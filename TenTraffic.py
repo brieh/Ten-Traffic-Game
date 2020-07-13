@@ -6,9 +6,9 @@ import sys
 
 WIDTH = 867
 HEIGHT = 650
-GRID_SPACE = WIDTH/10
-GRID_X = WIDTH/5
-GRID_Y = HEIGHT/6
+GRID_X = WIDTH/3.4
+GRID_Y = HEIGHT/4.6
+GRID_SPACE = WIDTH/10.4
 
 
 
@@ -28,37 +28,32 @@ def draw_lines(screen):
 
 def draw_grid(vals, screen):
 
-    myFont = pygame.font.SysFont("calibri", 35)
+    gridFont = pygame.font.SysFont("calibri", 28)
 
-#    x_pos = WIDTH/6
- #   y_pos = HEIGHT/7
     x_pos = GRID_X
     y_pos = GRID_Y
 
-    i = 0
+    i = 1
 
     for val in vals:
-        if i == 5:
-            x_pos = GRID_X
-            #x_pos = WIDTH/6 
-            #y_pos += HEIGHT/7
-            y_pos += GRID_SPACE
-            i = 0
-
-        val_label = myFont.render(str(val), 1, BLACK)
+        val_label = gridFont.render(str(val), 1, BLACK)
         screen.blit(val_label, (x_pos, y_pos))
-        x_pos += GRID_SPACE
-        i += 1
+        if i < 5:
+            x_pos += GRID_SPACE
+            i += 1
+        else:
+            x_pos = GRID_X
+            y_pos += GRID_SPACE
+            i = 1
 
     return
 
- 
-def load_images():
+
+
+def load_dice_images():
     images = {}
     numbers = ["d1", "d2", "d3", "d4", "d5", "d6"]
-    #font = pygame.font.Font(None, 72)
     for i,num in enumerate(numbers, start=1):
-        #images[i] = pygame.image.load(r'images/{}.jpg'.format(num)).convert()
         images[i] = pygame.image.load('images/{}.jpg'.format(num))
     
     return images
@@ -75,11 +70,15 @@ def main():
     blue_car = pygame.image.load('images/bluecar.png')		# pointing right so should start on left
     pink_car = pygame.image.load('images/pinkcar.png')		# pointing left so should start on right
 
+    
+    house_scale = (int(WIDTH*0.093), int(HEIGHT*0.129))
     # should be on right
-    blue_house = pygame.transform.scale(pygame.image.load('images/bluehouse.png'), (int(WIDTH/20), int(WIDTH/20)))
+    blue_house = pygame.transform.scale(pygame.image.load('images/bluehouse.png'), house_scale)
     # should be on left
-    pink_house = pygame.transform.scale(pygame.image.load('images/pinkhouse.png'), (int(WIDTH/20), int(WIDTH/20)))		
-    dice_images = load_images()
+    pink_house = pygame.transform.scale(pygame.image.load('images/pinkhouse.png'), house_scale)		
+
+
+    dice_images = load_dice_images()
 
     
 
@@ -94,7 +93,7 @@ def main():
     x_dice = 200
     y_dice = 400
 	
-    #DIE1 = pygame.Rect(left, top, WIDTH/20, WIDTH/20)
+   #DIE1 = pygame.Rect(left, top, WIDTH/20, WIDTH/20)
 
 
 
@@ -118,9 +117,15 @@ def main():
                     print(roll)
                     screen.blit(dice_images[roll], (x_dice, y_dice))
 
+
+        titleFont = pygame.font.SysFont("calibri", 35)
+        title_label = titleFont.render("Ten Traffic", 1, BLACK)
+        screen.blit(title_label, (WIDTH/2.5, HEIGHT/8.6))
+        
         draw_grid(grid_vals, screen)
-        screen.blit(blue_house, (((WIDTH/6) - (WIDTH/20) - 10), 50))
-        screen.blit(pink_house, (((WIDTH/6) + 4*(WIDTH/10) + 28), 50))
+        # house locations are relative to grid
+        screen.blit(blue_house, (((GRID_X) - house_scale[0] - 10), 50))
+        screen.blit(pink_house, (((GRID_X) + 4*(GRID_SPACE) + 28), 50))
 
         pygame.display.update()
 
