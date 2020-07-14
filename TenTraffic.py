@@ -9,6 +9,14 @@ HEIGHT = 650
 GRID_X = WIDTH/3.4
 GRID_Y = HEIGHT/4.6
 GRID_SPACE = WIDTH/10.4
+house_scale = (int(WIDTH*0.093), int(HEIGHT*0.129))
+car_scale = (int(WIDTH*0.074), int(HEIGHT*0.056))
+blue_car_positions = [[GRID_X - car_scale[0] - 20, GRID_Y + 4*GRID_SPACE + 10],
+                      [GRID_X - car_scale[0] - 20, GRID_Y + 4*GRID_SPACE + 50],
+                      [GRID_X - car_scale[0] - 20, GRID_Y + 4*GRID_SPACE + 90]]
+pink_car_positions = [[GRID_X + 4*(GRID_SPACE) + 35, GRID_Y + 4*GRID_SPACE + 10],
+                      [GRID_X + 4*(GRID_SPACE) + 35, GRID_Y + 4*GRID_SPACE + 50],
+                      [GRID_X + 4*(GRID_SPACE) + 35, GRID_Y + 4*GRID_SPACE + 90]]
 
 
 
@@ -49,6 +57,17 @@ def draw_grid(vals, screen):
     return
 
 
+def draw_cars(blue_car_positions, pink_car_positions):
+    
+    for pos in blue_car_positions:
+        screen.blit(blue_car, pos)
+
+    for pos in pink_car_positions:
+        screen.blit(pink_car, pos)
+
+    return
+
+
 
 def load_dice_images():
     images = {}
@@ -67,11 +86,10 @@ def main():
 
     # load all necessary images
 
-    blue_car = pygame.image.load('images/bluecar.png')		# pointing right so should start on left
-    pink_car = pygame.image.load('images/pinkcar.png')		# pointing left so should start on right
+    blue_car = pygame.transform.scale(pygame.image.load('images/bluecar.png'), car_scale)
+    pink_car = pygame.transform.scale(pygame.image.load('images/pinkcar.png'), car_scale)
 
     
-    house_scale = (int(WIDTH*0.093), int(HEIGHT*0.129))
     # should be on right
     blue_house = pygame.transform.scale(pygame.image.load('images/bluehouse.png'), house_scale)
     # should be on left
@@ -80,6 +98,8 @@ def main():
 
     dice_images = load_dice_images()
 
+#    val = random.randint(1,6)
+ #   screen.blit(dice_images[val], (DIE_1_X, DIE_1_Y))
     
 
     grid_vals = [random.randint(1,9) for i in range(25)]	# array of 25 random ints between 1 and 9
@@ -122,10 +142,23 @@ def main():
         title_label = titleFont.render("Ten Traffic", 1, BLACK)
         screen.blit(title_label, (WIDTH/2.5, HEIGHT/8.6))
         
+        
         draw_grid(grid_vals, screen)
+
+        
         # house locations are relative to grid
         screen.blit(blue_house, (((GRID_X) - house_scale[0] - 10), 50))
         screen.blit(pink_house, (((GRID_X) + 4*(GRID_SPACE) + 28), 50))
+
+
+        # cars
+        for pos in blue_car_positions:
+            screen.blit(blue_car, pos)
+
+        for pos in pink_car_positions:
+            screen.blit(pink_car, pos)
+        
+
 
         pygame.display.update()
 
