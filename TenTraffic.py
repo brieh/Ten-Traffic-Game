@@ -9,14 +9,22 @@ HEIGHT = 650
 GRID_X = WIDTH/3.4
 GRID_Y = HEIGHT/4.6
 GRID_SPACE = WIDTH/10.4
+
 house_scale = (int(WIDTH*0.093), int(HEIGHT*0.129))
 car_scale = (int(WIDTH*0.074), int(HEIGHT*0.056))
+dice_scale = (int(HEIGHT*0.068), int(HEIGHT*0.068))
+
 blue_car_positions = [[GRID_X - car_scale[0] - 20, GRID_Y + 4*GRID_SPACE + 10],
                       [GRID_X - car_scale[0] - 20, GRID_Y + 4*GRID_SPACE + 50],
                       [GRID_X - car_scale[0] - 20, GRID_Y + 4*GRID_SPACE + 90]]
 pink_car_positions = [[GRID_X + 4*(GRID_SPACE) + 35, GRID_Y + 4*GRID_SPACE + 10],
                       [GRID_X + 4*(GRID_SPACE) + 35, GRID_Y + 4*GRID_SPACE + 50],
                       [GRID_X + 4*(GRID_SPACE) + 35, GRID_Y + 4*GRID_SPACE + 90]]
+
+dice_positions = [
+        (WIDTH*0.39, GRID_Y + 4.7*GRID_SPACE),
+        (WIDTH*0.47, GRID_Y + 4.7*GRID_SPACE),
+        (WIDTH*0.55, GRID_Y + 4.7*GRID_SPACE)]
 
 
 
@@ -73,9 +81,16 @@ def load_dice_images():
     images = {}
     numbers = ["d1", "d2", "d3", "d4", "d5", "d6"]
     for i,num in enumerate(numbers, start=1):
-        images[i] = pygame.image.load('images/{}.jpg'.format(num))
+        images[i] = pygame.transform.scale(pygame.image.load('images/{}.jpg'.format(num)), dice_scale)
     
     return images
+
+
+def roll_dice():
+
+    diceroll = random.randint(1,6)
+
+    return (diceroll)
 
 
 
@@ -97,9 +112,7 @@ def main():
 
 
     dice_images = load_dice_images()
-
-#    val = random.randint(1,6)
- #   screen.blit(dice_images[val], (DIE_1_X, DIE_1_Y))
+#    val = roll_dice()
     
 
     grid_vals = [random.randint(1,9) for i in range(25)]	# array of 25 random ints between 1 and 9
@@ -157,6 +170,11 @@ def main():
 
         for pos in pink_car_positions:
             screen.blit(pink_car, pos)
+
+        # dice
+        for pos in dice_positions:
+            val = random.randint(1,6)
+            screen.blit(dice_images[val], pos)
         
 
 
