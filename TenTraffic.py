@@ -31,9 +31,135 @@ dice_positions = [
 RED = (255,0,0)
 BLUE = (0,0,255)
 YELLOW = (255,255,0)
+GREEN = (0, 255, 0)
+GREY = (100, 100, 100)
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 
+
+class Button:
+    def __init__(self, surface, button_text, size, center_coords,
+                 color_box_mouseover = RED,
+                 color_box_default = WHITE,
+                 color_text_mouseover = GREY,
+                 color_text_default = GREY):
+
+        self.surface = surface
+        self.button_text = button_text
+        self.size = size
+        self.center_coords = center_coords
+
+        self.c_box_mo = color_box_mouseover
+        self.c_box_default = color_box_default
+        self.c_text_mo = color_text_mouseover
+        self.c_text_default = color_text_default
+        self.c_c_box = color_box_default
+        self.c_c_text = color_text_default
+
+        self.rect = pygame.Rect((0, 0), size)
+        self.rect.center = center_coords
+
+    def update(self, player_input):
+
+        mouse_clicked = False
+
+        local_events, local_mousepos = player_input
+        mouse_x, mouse_y = local_mousepos
+
+        mouse_over = (   mouse_x >= self.rect.left
+                     and mouse_x <= self.rect.right
+                     and mouse_y >= self.rect.top
+                     and mouse_y <= self.rect.bottom )
+
+        for event in local_events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1: mouse_clicked = True
+        
+        if mouse_over and mouse_clicked:
+            return True
+
+        if mouse_over:
+            self.c_c_box = self.c_box_mo 
+            self.c_c_text = self.c_text_mo 
+        else: 
+            self.c_c_box = self.c_box_default 
+            self.c_c_text = self.c_text_default 
+
+    def draw(self): 
+       
+        #border = pygame.Rect((0,0), (self.size[0] + 5, self.size[1] + 5))
+        #pygame.draw.rect(self.surface, self.c_c_box, border, 2)
+        pygame.draw.rect(self.surface, self.c_c_box, self.rect)
+        draw_text(self.surface, 
+                  self.button_text, 
+                  pygame.font.SysFont("calibri", 32),
+                  self.center_coords, 
+                  self.c_c_text)
+
+
+
+def helper_text_objects(incoming_text, incoming_font, incoming_color, incoming_bg):
+
+    '''Generates the text objects used for drawing text.
+    This function is most often used in conjuction with the draw_text method.
+    It generates the text objects used by draw_text to actually display whatever
+        string is called by the method.
+
+    Args:
+        incoming_text (str):
+        incoming_font (pygame.font.Font):
+        incoming_color ((int, int, int)):
+        incoming_bg ((int, int, int), optional):
+
+    Returns:
+        Text_surface (pygame.Surface):
+        Text_surface.get_rect() (pygame.Rect):
+
+    '''
+
+    # if there is a background color, render with that.  
+    if incoming_bg: 
+        '''render creates a new Surface with the specified text rendered on it. 
+        # pygame provides no way to directly draw text on an existing Surface: 
+            instead you must use Font.render() to create an image (Surface) of the text, 
+            then blit this image onto another Surface.'''
+        Text_surface = incoming_font.render(incoming_text, True, incoming_color, incoming_bg) 
+    else:  # otherwise, render without a background.  
+        Text_surface = incoming_font.render(incoming_text, True, incoming_color) 
+
+    return Text_surface, Text_surface.get_rect()
+
+
+
+def draw_text(display_surface, text_to_display, font, 
+              coords, text_color, back_color = None, center = False):
+
+    ''' Displays text on the desired surface.  
+        Uses helper_text_objects (which uses font.render) to create a surface with text displayed on it and then blits it 
+    Args:
+        display_surface (pygame.Surface): the surface the text is to be displayed on.  
+        text_to_display (str): what is the text to be written 
+        font (pygame.font.Font): font object the text will be written using 
+        coords ((int, int)): where on the display_surface will the object be 
+            written, the text will be drawn from the upper left corner of the text.  
+        text_color ((int, int, int)): (R, G, B) color code for the desired color of the text.  
+        back_color ((int, int, int), optional): (R, G, B) color code for the background.  
+            If not included, the background is transparent.  
+    ''' 
+    
+    # get both the surface and rectangle of the desired message
+    text_surf, text_rect = helper_text_objects(text_to_display, font, text_color, back_color)
+    
+    # adjust the location of the surface based on the coordinates 
+    if not center: 
+        text_rect.topleft = coords 
+    else:
+        text_rect.center = coords 
+
+    # draw the text onto the display surface.  
+    display_surface.blit(text_surf, text_rect)
+
+    return
 
 
 
@@ -87,16 +213,26 @@ def load_dice_images():
 
 
 def roll_dice():
+    return random.randint(1,6)
 
-    diceroll = random.randint(1,6)
 
-    return (diceroll)
+
+def play_turn(player):
+
+    return "Done"
+
+
+
+
 
 
 
 def main():
 
     pygame.init()
+
+    game_over = False
+
 
 
     # load all necessary images
@@ -112,23 +248,19 @@ def main():
 
 
     dice_images = load_dice_images()
-#    val = roll_dice()
     
 
+   
     grid_vals = [random.randint(1,9) for i in range(25)]	# array of 25 random ints between 1 and 9
 
-    game_over = False
 
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))	# creates a display surface
 
 
-    x_dice = 200
-    y_dice = 400
-	
-   #DIE1 = pygame.Rect(left, top, WIDTH/20, WIDTH/20)
-
-
+    roll_button = Button(screen, "Roll", (WIDTH*0.094, HEIGHT*0.0657), (WIDTH*0.77, HEIGHT*0.34))
+    move_button = Button(screen, "Move", (WIDTH*0.094, HEIGHT*0.0657), (WIDTH*0.77, HEIGHT*0.436))
+    done_button = Button(screen, "Done", (WIDTH*0.094, HEIGHT*0.0657), (WIDTH*0.77, HEIGHT*0.53))
 
 
     while not game_over:
@@ -175,6 +307,11 @@ def main():
         for pos in dice_positions:
             val = random.randint(1,6)
             screen.blit(dice_images[val], pos)
+
+
+        roll_button.draw()
+        done_button.draw()
+        move_button.draw()
         
 
 
