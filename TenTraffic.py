@@ -37,6 +37,60 @@ WHITE = (255,255,255)
 BLACK = (0,0,0)
 
 
+
+FPS = 30
+FramePerSec = pygame.time.Clock()
+
+
+
+
+class Player(pygame.sprite.Sprite): 
+    def __init__(self, image, x, y):
+        super().__init__() 
+        self.image = image
+        #self.surf = pygame.Surface((50, 100)) 
+        self.rect = self.image.get_rect() 
+
+    def update(self): 
+        pressed_keys = pygame.key.get_pressed() 
+
+        #if pressed_keys[K_UP]: 
+        #self.rect.move_ip(0, -5) 
+        #if pressed_keys[K_DOWN]: 
+        #self.rect.move_ip(0,5) 
+
+        if self.rect.left > 0: 
+            if pressed_keys[K_LEFT]: 
+                self.rect.move_ip(-5, 0) 
+
+        if self.rect.right < SCREEN_WIDTH:        
+            if pressed_keys[K_RIGHT]: 
+                self.rect.move_ip(5, 0) 
+
+    def draw(self, surface): 
+        surface.blit(self.image, self.rect)
+
+
+"""class Die:
+    def __init__(self, dice_images, x):
+
+    def update(self):
+
+    def draw():
+
+    def roll_dice(screen, dice_images, positions):
+
+        for pos in positions:
+            val = random.randint(1,6)
+            screen.blit(dice_images[val], pos)
+
+        return """
+
+
+
+
+
+
 class Button:
     def __init__(self, surface, button_text, size, center_coords,
                  color_box_mouseover = RED,
@@ -58,6 +112,7 @@ class Button:
 
         self.rect = pygame.Rect((0, 0), size)
         self.rect.center = center_coords
+
 
     def update(self, player_input):
 
@@ -81,14 +136,14 @@ class Button:
         if mouse_over:
             self.c_c_box = self.c_box_mo 
             self.c_c_text = self.c_text_mo 
+            #print(self.rect.topleft)
         else: 
             self.c_c_box = self.c_box_default 
             self.c_c_text = self.c_text_default 
 
+
     def draw(self): 
        
-        #border = pygame.Rect((0,0), (self.size[0] + 5, self.size[1] + 5))
-        #pygame.draw.rect(self.surface, self.c_c_box, border, 2)
         pygame.draw.rect(self.surface, self.c_c_box, self.rect)
         draw_text(self.surface, 
                   self.button_text, 
@@ -132,10 +187,12 @@ def helper_text_objects(incoming_text, incoming_font, incoming_color, incoming_b
 
 
 def draw_text(display_surface, text_to_display, font, 
-              coords, text_color, back_color = None, center = False):
+        coords, text_color, back_color = None):
 
     ''' Displays text on the desired surface.  
-        Uses helper_text_objects (which uses font.render) to create a surface with text displayed on it and then blits it 
+        Uses helper_text_objects (which uses font.render) to create a surface with text 
+        displayed on it and then blits it 
+
     Args:
         display_surface (pygame.Surface): the surface the text is to be displayed on.  
         text_to_display (str): what is the text to be written 
@@ -151,10 +208,7 @@ def draw_text(display_surface, text_to_display, font,
     text_surf, text_rect = helper_text_objects(text_to_display, font, text_color, back_color)
     
     # adjust the location of the surface based on the coordinates 
-    if not center: 
-        text_rect.topleft = coords 
-    else:
-        text_rect.center = coords 
+    text_rect.center = coords 
 
     # draw the text onto the display surface.  
     display_surface.blit(text_surf, text_rect)
@@ -212,8 +266,13 @@ def load_dice_images():
     return images
 
 
-def roll_dice():
-    return random.randint(1,6)
+def roll_dice(screen, dice_images, positions):
+
+    for pos in positions:
+        val = random.randint(1,6)
+        screen.blit(dice_images[val], pos)
+
+    return 
 
 
 
@@ -233,54 +292,83 @@ def main():
 
     game_over = False
 
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))	# creates a display surface
 
 
-    # load all necessary images
-
-    blue_car = pygame.transform.scale(pygame.image.load('images/bluecar.png'), car_scale)
-    pink_car = pygame.transform.scale(pygame.image.load('images/pinkcar.png'), car_scale)
-
+    # load some images
     
-    # should be on right
-    blue_house = pygame.transform.scale(pygame.image.load('images/bluehouse.png'), house_scale)
     # should be on left
     pink_house = pygame.transform.scale(pygame.image.load('images/pinkhouse.png'), house_scale)		
 
+    # should be on right
+    blue_house = pygame.transform.scale(pygame.image.load('images/bluehouse.png'), house_scale)
 
     dice_images = load_dice_images()
-    
-
    
+
+
+    
     grid_vals = [random.randint(1,9) for i in range(25)]	# array of 25 random ints between 1 and 9
 
 
 
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))	# creates a display surface
+
+    roll_button = Button(screen, "Roll", (WIDTH*0.094, HEIGHT*0.0657), (WIDTH*0.81, HEIGHT*0.38))
+    move_button = Button(screen, "Move", (WIDTH*0.094, HEIGHT*0.0657), (WIDTH*0.81, HEIGHT*0.47))
+    done_button = Button(screen, "Done", (WIDTH*0.094, HEIGHT*0.0657), (WIDTH*0.81, HEIGHT*0.56))
 
 
-    roll_button = Button(screen, "Roll", (WIDTH*0.094, HEIGHT*0.0657), (WIDTH*0.77, HEIGHT*0.34))
-    move_button = Button(screen, "Move", (WIDTH*0.094, HEIGHT*0.0657), (WIDTH*0.77, HEIGHT*0.436))
-    done_button = Button(screen, "Done", (WIDTH*0.094, HEIGHT*0.0657), (WIDTH*0.77, HEIGHT*0.53))
+    # the three blue cars
+    blue_car = pygame.transform.scale(pygame.image.load('images/bluecar.png'), car_scale)
+
+    b_player1 = Player(blue_car, blue_car_positions[0][0], blue_car_positions[0][1])
+    b_player2 = Player(blue_car, blue_car_positions[1][0], blue_car_positions[1][1])
+    b_player3 = Player(blue_car, blue_car_positions[2][0], blue_car_positions[2][1])
+    
+    blue_cars = pygame.sprite.Group()
+    blue_cars.add(b_player1, b_player2, b_player3)
+
+    # the three pink cars
+    pink_car = pygame.transform.scale(pygame.image.load('images/pinkcar.png'), car_scale)
+
+    p_player1 = Player(pink_car, pink_car_positions[0][0], pink_car_positions[0][1])
+    p_player2 = Player(pink_car, pink_car_positions[1][0], pink_car_positions[1][1])
+    p_player3 = Player(pink_car, pink_car_positions[2][0], pink_car_positions[2][1])
+    
+    pink_cars = pygame.sprite.Group()
+    pink_cars.add(p_player1, p_player2, p_player3)
+
+
+
+    clock = pygame.time.Clock()
+
 
 
     while not game_over:
 
         screen.fill(WHITE)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
 
-                # get where the mouse was clicked
-                mouse_pos = pygame.mouse.get_pos()
-				
-		# if dice1 was clicked
-		# collidepoint tests if a point is within the specified RECT obj
-                if BUTTON.collidepoint(mouse_pos): 
-                    roll = random.randint(1,6)
-                    print(roll)
-                    screen.blit(dice_images[roll], (x_dice, y_dice))
+        list_of_events = pygame.event.get()
+        mouse_position = pygame.mouse.get_pos()
+
+        game_input = (list_of_events, mouse_position)
+
+
+        for event in list_of_events:
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # check all the buttons to see if they got clicked and if they did, take action
+
+        if roll_button.update(game_input):
+            roll_dice(screen, dice_images, dice_positions)
+
+#        if move_button.update(game_input):
+ #       if done_button.update(game_input):
+
+
 
 
         titleFont = pygame.font.SysFont("calibri", 35)
@@ -304,9 +392,7 @@ def main():
             screen.blit(pink_car, pos)
 
         # dice
-        for pos in dice_positions:
-            val = random.randint(1,6)
-            screen.blit(dice_images[val], pos)
+ #       roll_dice(screen, dice_images, dice_positions)
 
 
         roll_button.draw()
@@ -314,6 +400,7 @@ def main():
         move_button.draw()
         
 
+        clock.tick()
 
         pygame.display.update()
 
